@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Tarefas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 40px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #e6e6e6;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .actions button {
+      background-color: #f39c12;
+      margin-left: 5px;
+    }
+    .actions button.delete {
+      background-color: #e74c3c;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Tarefas</h1>
+    <ul id="lista-tarefas"></ul>
+    <input type="text" id="nova-tarefa" placeholder="Digite uma nova tarefa...">
+    <button onclick="adicionarTarefa()">Adicionar</button>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000/api/tarefas';
+
+    async function carregarTarefas() {
+      const res = await fetch(API);
+      const tarefas = await res.json();
+      const lista = document.getElementById('lista-tarefas');
+      lista.innerHTML = '';
+
+      tarefas.forEach(tarefa => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${tarefa.nome}</span>
+          <div class="actions">
+            <button onclick="editarTarefa('${tarefa._id}', '${tarefa.nome}')">✏️</button>
+            <button class="delete" onclick="deletarTarefa('${tarefa._id}')">🗑️</button>
+          </div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    async function adicionarTarefa() {
+      const input = document.getElementById('nova-tarefa');
+      const nome = input.value.trim();
+      if (!nome) return;
+
+      await fetch(API, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nome })
+      });
+
+      input.value = '';
+      carregarTarefas();
+    }
+
+    async function deletarTarefa(id) {
+      await fetch(`${API}/${id}`, {
+        method: 'DELETE'
+      });
+      carregarTarefas();
+    }
+
+    async function editarTarefa(id, nomeAntigo) {
+      const novoNome = prompt('Editar tarefa:', nomeAntigo);
+      if (!novoNome) return;
+
+      await fetch(`${API}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nome: novoNome })
+      });
+      carregarTarefas();
+    }
+
+    carregarTarefas();
+  </script>
+</body>
+</html>
