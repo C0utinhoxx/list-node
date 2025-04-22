@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Tarefa = require('../models/Tarefa');
 
-// GET - listar todas as tarefas
 router.get('/', async (req, res) => {
   try {
     const tarefas = await Tarefa.find();
@@ -12,7 +11,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST - criar uma nova tarefa
 router.post('/', async (req, res) => {
   try {
     const novaTarefa = new Tarefa({ nome: req.body.nome });
@@ -37,7 +35,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE - remover uma tarefa
+
 router.delete('/:id', async (req, res) => {
   try {
     await Tarefa.findByIdAndDelete(req.params.id);
